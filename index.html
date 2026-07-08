@@ -361,6 +361,7 @@ S.stats = Object.assign({}, DEF.stats, S.stats||{});
 if (!THEMES[S.theme]) S.theme = 'frutas';
 const save = () => localStorage.setItem(LS_KEY, JSON.stringify(S));
 const fmt = n => Math.floor(n).toLocaleString('es');
+function addPoints(n){ if (n<=0) return; S.puntos = Math.round((S.puntos+n)*10)/10; }
 
 /* ================= SONIDO ================= */
 let AC = null;
@@ -569,7 +570,7 @@ async function spin(){
       return;
     }
     S.balance -= bet;
-    S.puntos = Math.round((S.puntos + bet/10) * 10) / 10;
+    addPoints(bet/10);
     S.stats.wagered += bet;
   } else {
     S.free--;
@@ -621,7 +622,9 @@ async function spin(){
   if (total > 0){
     S.balance += total;
     S.stats.won += total;
-    msg('¡Ganaste ' + fmt(total) + '! 🎉', details.slice(0,3).join(' · '));
+    const winPts = Math.max(1, Math.round(total/50));
+    addPoints(winPts);
+    msg('¡Ganaste ' + fmt(total) + '! 🎉  +' + winPts + ' pts ⭐', details.slice(0,3).join(' · '));
     if (total >= bet*15){ sndBig(); flash('💰🎊💰','¡GRAN PREMIO!','+' + fmt(total), 3000); }
     else sndWin();
   } else {
@@ -699,7 +702,7 @@ $('paysBtn').onclick = ()=>{
     'Los premios son por línea y se multiplican por tu apuesta por línea.<br>' +
     em('wild') + ' <b>' + nm('wild') + '</b>: reemplaza cualquier símbolo.<br>' +
     em('scatter') + ' <b>' + nm('scatter') + '</b>: 3, 4 o 5 en cualquier posición dan <b>10, 15 o 25 giros gratis</b> con premios <b>x2</b>, más 2, 10 o 50 veces tu apuesta total.<br>' +
-    '⭐ Por cada 10 créditos apostados ganas <b>1 punto premio</b>. ¡Junta puntos y canjea tickets por premios de verdad!';
+    '⭐ Por cada 10 créditos apostados ganas <b>1 punto premio</b>, y cada vez que ganás un premio sumás puntos extra. ¡Junta puntos y canjea tickets por premios de verdad!';
   $('paysModal').classList.add('on');
 };
 
